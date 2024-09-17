@@ -1,19 +1,28 @@
-import GroupChat from "@/components/chat/group/GroupChat";
-import MessageInput from "@/components/chat/group/MessageInput";
-import GroupIcon from "@/components/chat/GroupIcon";
 import React from "react";
+import ClientPage from "@/components/chat/ClientPage";
+import { ChatProvider } from "@/components/context/ChatContext";
 
-const page = () => {
-	return (
-		<>
-			<GroupIcon />
-			<div className=' h-[calc(100%-8rem)] overflow-x-hidden overflow-y-scroll'>
-				<GroupChat />
-			</div>
-            <MessageInput/>
-			
-		</>
-	);
+const Page: React.FC<{ params: { groupId: string } }> = async ({ params }) => {
+  const { groupId } = params;
+
+  try {
+    // Fetch group details based on groupId
+    const response = await fetch(`http://localhost:8080/api/groups/${groupId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch group details');
+    }
+    const groupDetails = await response.json();
+
+    return (
+		<ChatProvider>
+      <ClientPage groupId={groupId} groupDetails={groupDetails} />
+
+		</ChatProvider>
+    );
+  } catch (error) {
+    console.error('Error in Page component:', error);
+    return <div>Error loading group details</div>;
+  }
 };
 
-export default page;
+export default Page;

@@ -44,6 +44,9 @@ interface UserContextType {
 	profileData: Profile | null;
 	updateUserData: (data: {user: User; profile: Profile}) => void;
 	GetGroups: () => Promise<HandleGroupsResponse | undefined>;
+	groups: Group[];
+	setGroupId: (groupId: string | null) => void;
+	groupId: string | null;
 }
 
 export interface Group {
@@ -71,6 +74,7 @@ export const AppProvider = ({children}: AppProviderProps) => {
 	const [userData, setUserData] = useState<User | null>(null);
 	const [profileData, setProfileData] = useState<Profile | null>(null);
 	const [groups, setGroups] = useState<Group[]>([]);
+	const [groupId, setGroupId] = useState<string | null>(null);
 
 	const updateUserData = (data: {user: User; profile: Profile}) => {
 		setUserId(data.user.userId);
@@ -79,14 +83,15 @@ export const AppProvider = ({children}: AppProviderProps) => {
 	};
 
 	useEffect(() => {
-		if (!userId && window?.Telegram?.WebApp) {
+		if (!userId ) {
 			const {user} = window.Telegram.WebApp.initDataUnsafe;
 
-			if (user) {
-				const username = user?.username || user?.id;
+			if (1) {
+				const username = user.username || user.id;
+			
 				console.log("Username:", username);
 
-				fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/profile`, {
+				fetch(`http://localhost:8080/api/profile`, {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
@@ -97,6 +102,7 @@ export const AppProvider = ({children}: AppProviderProps) => {
 					.then(({user, profile}) => {
 						console.log("Data received:", {user, profile});
 						updateUserData({user, profile});
+						setUserId(user.userId);
 					})
 					.catch((error) => console.error("Error:", error));
 			}
@@ -157,7 +163,7 @@ export const AppProvider = ({children}: AppProviderProps) => {
 
 	return (
 		<UserContext.Provider
-			value={{userId, userData, profileData, updateUserData, GetGroups}}
+			value={{userId, userData, profileData, updateUserData, GetGroups, setGroupId, groups, groupId}}
 		>
 			{children}
 		</UserContext.Provider>
