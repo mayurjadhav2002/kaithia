@@ -1,7 +1,7 @@
 import type {Metadata} from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import Link from "next/link";
+import BottomTabs from "@/components/BottomTabs";
 
 const geistSans = localFont({
 	src: "./fonts/GeistVF.woff",
@@ -29,47 +29,13 @@ export default function RootLayout({
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 			>
-       <div className="mb-16">
-       {children}
+				<div className="relative lg:w-2/4 lg:mx-auto w-full md:w-2/4 md:mx-auto xl:w-1/4 xl:mx-auto">
 
-       </div>
-				<div className='grid grid-cols-2 w-full fixed bottom-0 bg-white dark:bg-blue-800 h-14  p-2 border-t-2 '>
-					<Link
-						href='/profile'
-						className='w-full flex justify-evenly flex-col items-center '
-					>
-						<svg
-							xmlns='http://www.w3.org/2000/svg'
-							fill='currentColor'
-							className='bi bi-person-circle w-6 h-6'
-							viewBox='0 0 16 16'
-						>
-							<path d='M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0' />
-							<path
-								fill-rule='evenodd'
-								d='M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1'
-							/>
-						</svg>
-						<p className='text-sm'> My Profile</p>
-					</Link>
-
-					<Link
-						href='/profile'
-						className='w-full flex justify-evenly flex-col items-center +'
-					>
-						<svg
-							xmlns='http://www.w3.org/2000/svg'
-							width='16'
-							height='16'
-							fill='currentColor'
-							className='bi bi-person-circle w-6 h-6'
-							viewBox='0 0 16 16'
-						>
-							<path d='M14 1a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H4.414A2 2 0 0 0 3 11.586l-2 2V2a1 1 0 0 1 1-1zM2 0a2 2 0 0 0-2 2v12.793a.5.5 0 0 0 .854.353l2.853-2.853A1 1 0 0 1 4.414 12H14a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2z' />
-						</svg>
-						<p className='text-sm'> Chat</p>
-					</Link>
+				
+				<div className='mb-16'>{children}</div>
 				</div>
+				<BottomTabs/>
+				
 			</body>
 		</html>
 	);
