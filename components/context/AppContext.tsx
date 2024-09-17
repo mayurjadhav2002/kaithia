@@ -59,17 +59,17 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   useEffect(() => {
     if (!userId && window?.Telegram?.WebApp) {
       const { user } = window.Telegram.WebApp.initDataUnsafe;
-   
+  
       if (user) {
-        const userId = user.id || "mayur8908";
-        console.log("User ID:", userId);
+        const username = user?.username || user?.id;
+        console.log("Username:", username);
   
         fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/profile`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ username: userId }),
+          body: JSON.stringify({ username: username }),
         })
           .then((response) => response.json())
           .then(({ user, profile }) => {
