@@ -7,7 +7,7 @@ const BottomTabs = () => {
 	const pathname = usePathname();
 
 	return (
-		<div className='grid grid-cols-2 w-full max-w-full fixed bottom-0 bg-white dark:bg-gray-900 h-14  border-[1px] border-gray-200 '>
+		<div className='grid grid-cols-2 w-full max-w-full fixed bottom-0 bg-white  h-14  border-t-[1px] border-gray-200 shadow-xl '>
 			<Link
 				href='/profile'
 				className={`w-full flex justify-evenly flex-col items-center ${
