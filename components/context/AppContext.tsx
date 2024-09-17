@@ -59,7 +59,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   useEffect(() => {
     if (!userId && window?.Telegram?.WebApp) {
       const { user } = window.Telegram.WebApp.initDataUnsafe;
-  
+   
       if (user) {
         const userId = user.id || "mayur8908";
         console.log("User ID:", userId);
@@ -69,7 +69,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ userId }),
+          body: JSON.stringify({ username: userId }),
         })
           .then((response) => response.json())
           .then(({ user, profile }) => {

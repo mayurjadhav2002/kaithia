@@ -5,18 +5,18 @@ import Button from "../Button";
 import { useUser } from "../context/AppContext";
 
 const Detail = () => {
-	const {userData} = useUser();
+	const {userData, profileData} = useUser();
 	return (
 		<div className='px-6 mt-3 '>
 			<div className='space-y-2'>
 				<h3 className='text-2xl font-bold flex items-center'>
-				{userData?.first_name ?? "MJ"}{" "}
+				{userData?.first_name ? `${userData?.first_name} ${userData?.last_name}` : "MJ"}{" "}
 					<span className='p-1.5 bg-green-500 ml-3 rounded-full'></span>
 				</h3>
 				<p className='text-md font-medium flex items-center gap-2 flex-wrap '>
-					🌍 <span className='text-blue-700'>@mayur8908</span>
+					🌍 <span className='text-blue-700'>@{userData?.username}</span>
 				</p>
-				<p className='text-md '>Someone awesome living on Earth!</p>
+				<p className='text-md '>{profileData?.bio}</p>
 				<div className='flex items-center justify-between flex-wrap'>
 					<p className='text-md text-gray-600 dark:text-gray-400 font-semibold '>
 						Joined September 2024
@@ -27,12 +27,12 @@ const Detail = () => {
 				</div>
 				<div className='flex py-3 -space-x-2'>
 					<img
-						className='inline-block size-8 rounded-full ring-2 ring-white dark:ring-neutral-900'
+						className='inline-block size-8 rounded-full ring-2 ring-white '
 						src='/avatar.jpg'
 						alt='Avatar'
 					/>
 					<img
-						className='inline-block size-8 rounded-full ring-2 ring-white dark:ring-neutral-900'
+						className='inline-block size-8 rounded-full ring-2 ring-white '
 						src='/avatar.jpg'
 						alt='Avatar'
 					/>
