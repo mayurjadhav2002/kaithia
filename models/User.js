@@ -17,7 +17,6 @@ const User = mongoose.Schema(
         userId:{
             type: String,
             required: true,
-        
         },
 		password: {
 			type: String,
@@ -39,6 +38,7 @@ const User = mongoose.Schema(
 			type: String,
 			default: "",
 		},
+		
 	},
 	{timestamps: true}
 );
