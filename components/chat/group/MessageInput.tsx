@@ -1,16 +1,18 @@
 "use client"
+import { useUser } from "@/components/context/AppContext";
 import { useChat } from "@/components/context/ChatContext";
 import React, { useState } from "react";
 
 function MessageInput() {
+	const { userData } = useUser();
 	const [message, setMessage] = useState<string>("");
 	const { addMessage } = useChat();
   
 	const handleSend = () => {
 	  if (message.trim()) {
 		const newMessage = {
-		  id: Date.now().toString(), // Use a unique ID generator or a library
-		  user: "currentUser", // Replace with actual user data
+		  id: Date.now().toString(),
+		  user: userData?.first_name || "Anonymous",
 		  content: message,
 		  timestamp: new Date().toISOString(),
 		};

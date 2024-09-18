@@ -9,7 +9,7 @@ const GroupChat: React.FC = () => {
   return (
     <div className='w-full px-3 overflow-hidden pt-3'>
       <div className='grid pb-11'>
-        {messages.map((message) => (
+        {messages && messages.map((message) => (
           <div
             key={message.id}
             className={`flex gap-2.5 ${
