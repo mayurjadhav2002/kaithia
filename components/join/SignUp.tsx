@@ -142,6 +142,10 @@ const SignUp = () => {
 
 	return (
 		<>
+			<p className='text-left fixed text-gray-400 bottom-0 text-xs'>
+				User: {userDetails.userId}
+			</p>
+
 			<div>
 				{pageloading && (
 					<div className='loadingScren'>
