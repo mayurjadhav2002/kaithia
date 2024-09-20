@@ -10,4 +10,7 @@ user_route.post("/getGroups", GroupData.GetAllGroupsOfUser);
 user_route.get("/groups/:groupId", GroupData.GetGroupDetails);
 user_route.get("/messages/:groupId", GroupData.GetGroupMessages);
 user_route.post("/update_phone", UserData.UpdatePhoneNumber);
+user_route.get("/", (req,res)=>{
+    res.send("Hello, World!");
+})
 module.exports = user_route;
