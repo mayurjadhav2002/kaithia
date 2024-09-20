@@ -38,8 +38,8 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AppProvider>
-          <div className="relative lg:w-2/4 lg:mx-auto w-full md:w-2/4 md:mx-auto xl:w-1/4 xl:mx-auto bg-white">
-            <div className="mb-16">{children}</div>
+          <div className="relative lg:w-2/4 lg:mx-auto w-full md:w-2/4 md:mx-auto xl:w-1/4 xl:mx-auto h-screen bg-white" >
+            <div className="">{children}</div>
           </div>
         </AppProvider>
       </body>

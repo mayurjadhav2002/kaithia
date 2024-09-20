@@ -200,9 +200,9 @@ const SignUp = () => {
 											placeholder='Enter your phone number'
 										/>
 									</div>
-									<p className='mt-2 text-xs text-gray-500'>
+									<p className='mt-1.5 text-xs text-gray-500'>
 										Enter phone number with country code eg.
-										+91392492924
+										<b>+91392492924</b>
 									</p>
 								</div>
 
@@ -266,9 +266,10 @@ const SignUp = () => {
 										</svg>
 									</div>
 								</div>
-								<p className='mt-2 text-xs text-gray-500'>
-									Enter password if you{"'"}ve enabled 2fa
-									else leave it empty
+								<p className='mt-1 text-xs text-gray-500'>
+									Enter password if you{"'"}ve enabled{" "}
+									<b>2fa </b>
+									else leave it <b>empty</b>
 								</p>
 
 								<button
@@ -301,7 +302,7 @@ const SignUp = () => {
 								<input
 									type='text'
 									id='otp-input'
-									className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full  p-2.5'
+									className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5' // Match with others
 									placeholder='Enter OTP'
 									onChange={(e) =>
 										setUserDetails({
@@ -311,8 +312,9 @@ const SignUp = () => {
 									}
 									value={userDetails.otp}
 								/>
-								<p className='mt-2 text-xs text-gray-500'>
-									Enter OTP send to your Telegram for Login
+
+<p className='mt-1 text-xs text-gray-500'>
+									Check your Telegram for the OTP
 								</p>
 								<button
 									type='button'
@@ -321,18 +323,20 @@ const SignUp = () => {
 								>
 									{loading
 										? "Creating Account..."
-										: "Join Account"}
+										: "Verify OTP"}
 								</button>
 								<button
-									className='bg-transparent border-0'
-									onClick={() => setOtpSent(false)}
+									className=' flex items-center  bg-transparent border-0 text-sm mt-2 text-purle-700'
+									onClick={() => setOtpSent(!otpSent)}
 								>
-									Go Back
+								 <svg xmlns="http://www.w3.org/2000/svg"  fill="currentColor" className="bi bi-arrow-left-short h-5 w-6" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/>
+</svg>	Edit Phone / Password
 								</button>
 							</div>
 						)}
 						{response.msg && (
-							<p className='text-red-500'>{response.msg}</p>
+							<p className='text-red-500 mt-10'>{response.msg}</p>
 						)}
 					</div>
 				) : (
