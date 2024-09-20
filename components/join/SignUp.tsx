@@ -29,21 +29,32 @@ const SignUp = () => {
 	const [loggedIn, setLoggedIn] = useState<boolean>(false);
 	const [passwordType, setPasswordType] = useState<boolean>(true);
 	const [pageloading, setPageLoading] = useState<boolean>(true);
-	useEffect(() => {
+		useEffect(() => {
+		const urlParams = new URLSearchParams(window.location.search);
+		const userIdFromUrl = urlParams.get('u');
+
+		if (userIdFromUrl) {
+			setUserDetails((prev) => ({ ...prev, userId: userIdFromUrl }));
+			setPageLoading(false); 
+			return; 
+		}
+
 		if (window.Telegram && window.Telegram.WebApp) {
-			const userId = window.Telegram.WebApp.initDataUnsafe?.user?.id;
-			if (userId) {
-				setUserDetails({...userDetails, userId});
+			const telegramUserId = window.Telegram.WebApp.initDataUnsafe?.user?.id;
+
+			if (telegramUserId) {
+				setUserDetails((prev) => ({ ...prev, userId: telegramUserId }));
 				const isLoggedIn = localStorage.getItem("loggedIn");
 				if (isLoggedIn) {
 					setLoggedIn(true);
 				}
 			} else {
-				setResponse({msg: "Unable to retrieve Telegram user ID"});
+				setResponse({ msg: "Unable to retrieve Telegram user ID, Sorry We cant verify you! Please try using Telegram in-app browser" });
 			}
-			setPageLoading(false);
 		}
-	}, [userDetails]);
+
+		setPageLoading(false);
+	}, []);
 
 	const handleRequestOtp = async () => {
 		const {isValid, cleanedNumber} = validatePhoneNumber(
@@ -179,9 +190,9 @@ const SignUp = () => {
 												viewBox='0 0 24 24'
 											>
 												<path
-													fill-rule='evenodd'
+													fillRule='evenodd'
 													d='M5 4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4Zm12 12V5H7v11h10Zm-5 1a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2H12Z'
-													clip-rule='evenodd'
+													clipRule='evenodd'
 												/>
 											</svg>
 										</div>
@@ -224,9 +235,9 @@ const SignUp = () => {
 											viewBox='0 0 24 24'
 										>
 											<path
-												fill-rule='evenodd'
+												fillRule='evenodd'
 												d='M8 10V7a4 4 0 1 1 8 0v3h1a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h1Zm2-3a2 2 0 1 1 4 0v3h-4V7Zm2 6a1 1 0 0 1 1 1v3a1 1 0 1 1-2 0v-3a1 1 0 0 1 1-1Z'
-												clip-rule='evenodd'
+												clipRule='evenodd'
 											/>
 										</svg>
 									</div>
@@ -330,7 +341,7 @@ const SignUp = () => {
 									onClick={() => setOtpSent(!otpSent)}
 								>
 								 <svg xmlns="http://www.w3.org/2000/svg"  fill="currentColor" className="bi bi-arrow-left-short h-5 w-6" viewBox="0 0 16 16">
-  <path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/>
+  <path fillRule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/>
 </svg>	Edit Phone / Password
 								</button>
 							</div>

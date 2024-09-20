@@ -2,7 +2,6 @@
 
 import localFont from "next/font/local";
 import "./globals.css";
-import { AppProvider } from "@/components/context/AppContext";
 import Script from "next/script";
 
 const geistSans = localFont({
@@ -37,11 +36,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <AppProvider>
           <div className="relative lg:w-2/4 lg:mx-auto w-full md:w-2/4 md:mx-auto xl:w-1/4 xl:mx-auto h-screen bg-white" >
-            <div className="">{children}</div>
+           {children}
           </div>
-        </AppProvider>
       </body>
     </html>
   );
