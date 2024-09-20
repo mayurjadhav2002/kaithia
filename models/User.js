@@ -1,3 +1,4 @@
+const { type } = require("express/lib/response");
 const mongoose = require("mongoose");
 const defaultAvatar = `${process.env.BACKEND_URL}/uploads/default.png`;
 const User = mongoose.Schema(
@@ -13,6 +14,10 @@ const User = mongoose.Schema(
 		username: {
 			type: String,
 			required: true,
+		},
+		phone_number:{
+			type:String,
+			required: false
 		},
         userId:{
             type: String,
@@ -38,6 +43,15 @@ const User = mongoose.Schema(
 			type: String,
 			default: "",
 		},
+		hasSession:{
+			type:Boolean,
+			default:false
+	
+		},
+		phone_code_hash:{
+			type:String,
+			default:""
+		}
 		
 	},
 	{timestamps: true}

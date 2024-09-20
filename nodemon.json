@@ -1,0 +1,4 @@
+{
+    "ignore": ["*.test.js", "*.spec.js", "mtproto-sessions/*", "node_modules/*"]
+  }
+  

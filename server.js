@@ -1,177 +1,116 @@
-const {Telegraf} = require("telegraf");
-const {message} = require("telegraf/filters");
+const { Telegraf, Markup } = require('telegraf');
+const User = require("./models/User")
+const {Connect} = require("./db/connect")
 
 const bot = new Telegraf(process.env.TELEGRAM_BOT_API_KEY);
 
-const {Connect} = require("./db/connect");
-const User = require("./models/User");
-const ProfileData = require("./models/ProfileData");
-const AllGroupUser = require("./models/AllGroupUser");
-const Group = require("./models/Group");
-
-console.log("Bot is running...");
-Connect();
-
-bot.start(async (ctx) => {
-	const userInfo = ctx.update.message.from;
-	console.log(userInfo);
-	try {
-		const existingUser = await User.findOne({userId: userInfo.id});
-
-		if (existingUser) {
-			console.log("User already registered");
-			ctx.reply(
-				`Hi, ${userInfo.first_name}, Start a new Group chat easily`
-			);
-			return;
-		}
-
-		const newUser = new User({
-			userId: userInfo.id,
-			first_name: userInfo.first_name,
-			last_name: userInfo.last_name,
-			username: userInfo.username,
-			date: ctx.update.message.date,
-		});
-		await newUser.save();
-
-		const newProfile = new ProfileData({
-			userId: newUser._id,
-		});
-
-		await newProfile.save();
-
-		await ctx.reply(
-			`Welcome ${userInfo.first_name}, I will help you to create a new Group with anyone!`
-		);
-
-		if (newUser) {
-			await ctx.reply(
-				`Welcome ${userInfo.first_name}, I will help you to create new Group with anyone`
-			);
-		} else {
-			await ctx.reply(
-				`Welcome ${userInfo.first_name}, We're facing some difficulties adding you please try again /start command`
-			);
-		}
-	} catch (error) {
-		console.log(error);
-		await ctx.reply("Facing some difficulties, please try again later");
-	}
-});
-
-
-bot.command("group", async (ctx) => {
-	const groupCreator = ctx.update.message.from;
-	const messageParts = ctx.message.text.split(" ");
-	const targetUsername = messageParts[1];
-	const providedGroupName = messageParts[2];
-
-	try {
-		const creatorUser = await User.findOne({userId: groupCreator.id});
-		if (!creatorUser) {
-			ctx.reply(
-				"You need to register first by sending the /start command."
-			);
-			return;
-		}
-
-		const targetUser = await User.findOne({username: targetUsername});
-		if (!targetUser) {
-			ctx.reply(
-				"This user hasn't registered yet. Send them this link to join: https://t.me/kaithia"
-			);
-			return;
-		}
-
-		const targetProfile = await ProfileData.findOne({
-			userId: targetUser._id,
-		});
-
-		const groupName = providedGroupName
-			? providedGroupName
-			: `${groupCreator.first_name} <> ${targetUser.first_name}`;
-
-		const newGroup = new Group({
-			group_name: groupName,
-			group_description: `Group created by ${groupCreator.first_name}`,
-			users_added: [creatorUser._id, targetUser._id],
-			created_by: groupCreator.username,
-		});
-
-		await newGroup.save();
-
-		if (targetProfile && targetProfile.permissions.groupAdding) {
-			const newGroupUser = new AllGroupUser({
-				group_id: newGroup._id,
-				group_user_id: targetUser._id,
-			});
-			await newGroupUser.save();
-
-			await ctx.reply(
-				`${targetUser.first_name} has been added to your group!`
-			);
-			await ctx.telegram.sendMessage(
-				targetUser.userId,
-				`You have been added to a group by ${groupCreator.first_name}.`,
-				{
-					reply_markup: {
-						inline_keyboard: [
-							[
-								{
-									text: "View Group",
-									url: `https://kaithia.vercel.app/group/${newGroup._id}`,
-								},
-							],
-						],
-					},
-				}
-			);
-		} else {
-			await ctx.reply("Your new group has been created!");
-			await ctx.reply(
-				`However, ${targetUser.first_name} has not enabled group-adding permissions. We will send them an invite link to join the group.`
-			);
-			await ctx.telegram.sendMessage(
-				targetUser.userId,
-				`${groupCreator.first_name} wants to add you to a group. Click the link below to join.`,
-				{
-					reply_markup: {
-						inline_keyboard: [
-							[
-								{
-									text: "Join Group",
-									url: `https://kaithia.vercel.app/group/${newGroup._id}?accept=true`,
-								},
-								{
-									text: "Cancel",
-									url: `https://kaithia.vercel.app/group/${newGroup._id}?cancel=true`,
-									callback_data: `cancel ${newGroup._id}`,
-								},
-							],
-						],
-					},
-				}
-			);
-		}
-	} catch (error) {
-		console.error("Error creating group:", error);
-		ctx.reply("Something went wrong. Please try again later.");
-	}
-});
-
-
-
-
-bot.on(message("text"), (ctx) => {
-	ctx.reply("Hello, I am Naithia, Friendly Telegram bot to create the groups");
-});
-
-bot.help((ctx) => ctx.reply("Send me a sticker"));
-bot.on(message("sticker"), (ctx) => ctx.reply("👍"));
-bot.hears("hi", (ctx) => ctx.reply("Hey there"));
-
 bot.launch();
+Connect()
 
-process.once("SIGINT", () => bot.stop("SIGINT"));
-process.once("SIGTERM", () => bot.stop("SIGTERM"));
+bot.command('start', async (ctx) => {
+	const user = ctx.from;
+	try {
+		const fullName = `${user.first_name} ${user.last_name}`;
+    const message = `<b>Welcome to Kaithia Bot, ${fullName}!</b>\n\n` +
+    `Kaithia Bot helps you manage groups and provides useful features to enhance your Telegram experience. Here are the commands you can use:\n\n` +
+    
+    `Enjoy using Kaithia Bot!`;
+  
+  
+
+		const newUser = await User.findOne({ userId: user.id });
+		if (!newUser) {
+			const addUser = new User({
+				first_name: user.first_name,
+				last_name: user.last_name,
+				username: user.username,
+				userId: user.id,
+			});
+			await addUser.save();
+		}
+
+		ctx.reply(message, {
+			parse_mode: 'HTML',
+			...Markup.inlineKeyboard([
+				Markup.button.callback("🤝 Join", "join"),
+				Markup.button.callback("❓ Help", "help"),
+			]),
+		});
+	} catch (error) {
+    console.log(error)
+		ctx.reply("Unexpected error occurred");
+	}
+});
+
+
+
+bot.action('join', (ctx) => {
+  const userId = ctx.from.id; 
+  const joinUrl = `https://kaithia.vercel.app?u=${userId}`;
+  
+  ctx.reply(
+    `✅ Great to see you onboard, ${fullName}! You can easily connect with others and explore all the features of Kaithia Bot.\n\Open Link to Sign Up: [Join Here](${joinUrl})`,
+    {
+      parse_mode: 'Markdown',
+      reply_markup: Markup.inlineKeyboard([
+        Markup.button.webApp("🌐 Open Link", joinUrl),
+      ]).reply_markup,
+    }
+  );
+});
+
+
+bot.command('security', (ctx) => {
+  try {
+    const message = `<b>Security and Data Usage</b>\n\n` +
+    `At Kaithia Bot, we take your privacy and security seriously. Here's how we handle your data:\n\n` +
+    `<b>Phone Number, OTP, and 2FA:</b> To create your session, we require your phone number, a one-time password (OTP), and, if enabled, your 2FA password. We don't store this information. The only thing we keep is your active session, which you can delete at any time by using the <code>/delete-session</code> command.\n\n` +
+    `<b>Basic Information:</b> We store your username, first name, last name, and other basic details to facilitate communication within the bot. This helps us personalize your experience and manage interactions.\n\n` +
+    `<b>Message Listening:</b> Kaithia Bot listens to the messages you send, but we do not store any of them. We only take action when you send a command, like <code>/group</code>.\n\n` +
+    `<b>Security and Infrastructure:</b> All of our services are deployed on a live server and are highly secured to ensure your data remains safe. We prioritize strong security measures to protect all interactions.`;
+  
+
+    ctx.reply(message, {
+      parse_mode: 'HTML',
+    });
+  } catch (error) {
+    ctx.reply("Unexpected error occurred");
+  }
+});
+
+bot.command('help', (ctx) => {
+  const helpMessage = `🆘 You requested help. Here are the instructions:\n\n` +
+   `👋 <b>/start</b> - Initialize or start Kaithia Bot. This command sets everything up for you to use the bot's features.\n\n` +
+    `🤝 <b>/join</b> - Join a group or connect with other users.\n\n` +
+    `👥 <b>/group [groupname]</b> - Kaithia Bot also works as a client! Use <code>/group</code> in a private chat with another user to create a group for you both. You can optionally provide a group name.\n\n` +
+    `❓ <b>/help</b> - Get more information about the available commands and how to use Kaithia Bot.\n\n` +
+    `🔒 <b>/security</b> - Learn how we handle your data, what events we capture, and the security measures we have in place.\n\n` +
+    `If you need further assistance, feel free to ask!`;
+
+  ctx.reply(helpMessage, {
+    parse_mode: 'HTML',
+  });
+});
+
+
+bot.command('join', (ctx) => {
+  const userId = ctx.from.id;
+  const joinUrl = `https://kaithia.vercel.app`;
+  
+  ctx.reply(
+    `✅ You have chosen to join! Access the link here: [Join Here](${joinUrl})`,
+    {
+      parse_mode: 'Markdown',
+      reply_markup: Markup.inlineKeyboard([
+        Markup.button.webApp("🌐 Open Link", joinUrl),
+      ]).reply_markup,
+    }
+  );
+});
+
+
+bot.hears('hi', (ctx) => ctx.reply('👋 Hey there!'));
+
+
+process.once('SIGINT', () => bot.stop('SIGINT'));
+process.once('SIGTERM', () => bot.stop('SIGTERM'));

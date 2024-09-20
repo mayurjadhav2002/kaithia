@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose');
 
 const Connect = async () => {
@@ -10,6 +9,7 @@ const Connect = async () => {
             return;
         }
 
+        // Connect without deprecated options
         await mongoose.connect(mongoURI);
 
         mongoose.connection.on('connected', () => {
