@@ -2,7 +2,6 @@
 
 import localFont from "next/font/local";
 import "./globals.css";
-import BottomTabs from "@/components/BottomTabs";
 import { AppProvider } from "@/components/context/AppContext";
 import Script from "next/script";
 
