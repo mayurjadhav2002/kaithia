@@ -84,14 +84,14 @@ export const AppProvider = ({children}: AppProviderProps) => {
 
 	useEffect(() => {
 		if (!userId ) {
-			const {user} = window.Telegram.WebApp.initDataUnsafe;
+			const {user} = {user: {username: "Cjname11", id: "Cjname11"}};
 
 			if (1) {
 				const username = user.username || user.id;
 			
 				console.log("Username:", username);
 
-				fetch(`http://localhost:8080/api/profile`, {
+				fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/profile`, {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",

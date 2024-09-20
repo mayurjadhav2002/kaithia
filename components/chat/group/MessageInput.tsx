@@ -5,21 +5,28 @@ import React, { useState } from "react";
 
 function MessageInput() {
 	const { userData } = useUser();
-	const [message, setMessage] = useState<string>("");
-	const { addMessage } = useChat();
-  
-	const handleSend = () => {
-	  if (message.trim()) {
-		const newMessage = {
-		  id: Date.now().toString(),
-		  user: userData?.first_name || "Anonymous",
-		  content: message,
-		  timestamp: new Date().toISOString(),
-		};
-		addMessage(newMessage);
-		setMessage("");
-	  }
+    const [message, setMessage] = useState<string>("");
+    const { sendMessage } = useChat();
+
+    const handleSend = () => {
+        if (message.trim()) {
+			const newMessage = {
+				id: Date.now().toString(),
+				username: userData?.username || "Anonymous",
+				user: userData?.first_name || "Anonymous",
+				content: message,
+				timestamp: new Date().toISOString(),
+			};
+            sendMessage(newMessage); 
+            setMessage("");
+        }
+    };
+	const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+		if (e.key === 'Enter') {
+			handleSend();
+		}
 	};
+	
   
 	return (
   <div className='fixed w-full bottom-16 h-14 px-2 pt-1 bg-white dark:bg-dark'>
@@ -45,8 +52,11 @@ function MessageInput() {
 							  className='grow shrink basis-0 text-black text-xs font-medium leading-4 focus:outline-none'
 							  placeholder='Type here...'
 							  value={message}
+							  onKeyDown={handleKeyPress}
         onChange={(e) => setMessage(e.target.value)}
 						  />
+						      <p id="helper-text-explanation" className="mt-2 text-sm text-gray-500 dark:text-gray-400">Select a phone number that matches the format.</p>
+
 					  </div>
 					  <div className='flex items-center gap-2'>
 						  <svg

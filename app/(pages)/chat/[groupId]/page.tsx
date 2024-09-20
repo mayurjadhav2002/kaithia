@@ -7,7 +7,7 @@ const Page: React.FC<{ params: { groupId: string } }> = async ({ params }) => {
 
   try {
     // Fetch group details based on groupId
-    const response = await fetch(`http://localhost:8080/api/groups/${groupId}`);
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/groups/${groupId}`);
     if (!response.ok) {
       throw new Error('Failed to fetch group details');
     }
