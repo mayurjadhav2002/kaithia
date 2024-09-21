@@ -1,7 +1,6 @@
 import os
 import asyncio
 import logging
-import signal
 from telethon import TelegramClient, events, functions, types
 from dotenv import load_dotenv
 from watchdog.observers import Observer
@@ -51,11 +50,11 @@ async def check_command(event, client):
                 title=group_name,
                 users=participants,
             ))
-            
+                
             group_details = created_group.stringify()
-            
+                
             chat_id_match = re.search(r'peerchat\s*\(\s*chat_id\s*=\s*(\d+)\s*\)', group_details, re.IGNORECASE)
-            
+                
             if chat_id_match:
                 chat_id = int(chat_id_match.group(1))
                 
@@ -82,6 +81,7 @@ async def check_command(event, client):
                 await event.message.edit(f"Failed to create group: {str(e)}")
 
 async def load_client_for_session(session_file):
+    """Load a Telegram client for the given session file."""
     session_path = os.path.join(session_dir, session_file)
     logging.info(f"Attempting to load session from: {session_path}") 
 
@@ -110,11 +110,13 @@ async def load_client_for_session(session_file):
         await client.disconnect()
 
 async def load_clients():
+    """Load all existing client sessions."""
     session_files = [f for f in os.listdir(session_dir) if f.endswith('_session.session')]
     for session_file in session_files:
         await load_client_for_session(session_file)
 
 class SessionFileEventHandler(FileSystemEventHandler):
+    """Handler for file system events to detect new session files."""
     def __init__(self, loop):
         self.loop = loop
 
@@ -126,6 +128,7 @@ class SessionFileEventHandler(FileSystemEventHandler):
         asyncio.run_coroutine_threadsafe(load_client_for_session(session_file), self.loop)
 
 def start_observer(loop):
+    """Start the file system observer to watch for new session files."""
     event_handler = SessionFileEventHandler(loop)
     observer = Observer()
     observer.schedule(event_handler, path=session_dir, recursive=False)
@@ -137,24 +140,11 @@ async def main():
     observer = start_observer(loop)
     await load_clients()
     try:
-        await asyncio.gather(*[client.run_until_disconnected() for client in clients])
-    except asyncio.CancelledError:
-        logging.info("Main loop cancelled.")
+        while True:
+            await asyncio.sleep(1)
     finally:
         observer.stop()
         observer.join()
 
-def signal_handler(sig, frame):
-    logging.info("Received exit signal, shutting down...")
-    for client in clients:
-        asyncio.create_task(client.disconnect())
-    asyncio.get_event_loop().stop()
-
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
-    try:
-        asyncio.run(main())
-    except Exception as e:
-        logging.error(f"An unexpected error occurred: {str(e)}")
+    asyncio.run(main())
