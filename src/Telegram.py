@@ -1,10 +1,9 @@
 from telethon import TelegramClient
 import os
-from dotenv import load_dotenv
-from flask_cors import CORS
-import requests
 import asyncio
 from filelock import FileLock
+from dotenv import load_dotenv
+
 load_dotenv()
 
 class Telegram:
@@ -12,18 +11,19 @@ class Telegram:
         self.api_id = api_id
         self.api_hash = api_hash
 
+
     def get_client(self, phone_number):
         session_path = f'store/{phone_number}_session'
         return TelegramClient(session_path, self.api_id, self.api_hash)
 
+
+
     async def request_otp(self, phone_number):
         session_path = f'store/{phone_number}_session'
-        lock_path = f'{session_path}.lock' 
-        
-        async with FileLock(lock_path): 
+        lock_path = f'{session_path}.lock'
+        with FileLock(lock_path):
             client = self.get_client(phone_number)
             await client.connect()
-
             try:
                 if not await client.is_user_authorized():
                     result = await client.send_code_request(phone_number)
@@ -33,14 +33,16 @@ class Telegram:
             finally:
                 await client.disconnect()
 
+
+
     async def verify_otp(self, phone_number, otp, phone_code_hash, password=None):
         session_path = f'store/{phone_number}_session'
-        lock_path = f'{session_path}.lock'  
+        lock_path = f'{session_path}.lock'
         
-        async with FileLock(lock_path): 
+        
+        with FileLock(lock_path):
             client = self.get_client(phone_number)
             await client.connect()
-
             try:
                 await client.sign_in(phone_number, otp, phone_code_hash=phone_code_hash)
                 return {"success": True, "message": "Successfully signed in."}
