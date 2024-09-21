@@ -144,11 +144,17 @@ const SignUp = () => {
 		}
 	};
 
+	const handleLogOut = async() =>{
+		setLoggedIn(false)
+		await localStorage.removeItem('loggedIn')
+	}
+
 	const isLoggedIn =
 		typeof window !== "undefined" && localStorage.getItem("loggedIn");
 
+	
 	if (isLoggedIn) {
-		return <LoggedInComponent />;
+		return <LoggedInComponent handleLogOut={handleLogOut}/>;
 	}
 
 	return (
@@ -351,18 +357,23 @@ const SignUp = () => {
 						)}
 					</div>
 				) : (
-					<LoggedInComponent />
+					<LoggedInComponent  handleLogOut={handleLogOut}/>
 				)}
 			</div>
 		</>
 	);
 };
 
-const LoggedInComponent = () => {
+const LoggedInComponent = ({handleLogOut}: { handleLogOut: () => void }) => {
 	return (
-		<p className='px-3 mt-6 text-center font-bold text-3xl text-violet-600'>
+		<>
+			<p className='px-3 mt-6 text-center font-bold text-3xl text-violet-600'>
 			You{"'"}re already logged in!
 		</p>
+		<button type="button" onClick={handleLogOut} className="mx-auto mt-10 focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">Log out</button>
+
+		</>
+	
 	);
 };
 
