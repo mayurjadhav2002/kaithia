@@ -5,19 +5,19 @@ import threading
 from telethon import TelegramClient
 from dotenv import load_dotenv
 from flask_cors import CORS
-import requests 
+import requests
 import asyncio
+from filelock import FileLock
 
 load_dotenv()
 
 api_id = os.getenv('TELEGRAM_APP_API_ID')
 api_hash = os.getenv('TELEGRAM_APP_API_HASH')
-bot_key= os.getenv('TELEGRAM_BOT_API_KEY')
+bot_key = os.getenv('TELEGRAM_BOT_API_KEY')
 node_backend = os.getenv('BACKEND_URL')
-telegram_service = Telegram( api_id, api_hash)
+telegram_service = Telegram(api_id, api_hash)
 
 app = Flask(__name__)
-
 CORS(app)
 
 def run_async(coro):
@@ -32,7 +32,6 @@ def update_backend_with_phone(userId, phone_number):
     except Exception as e:
         print(f"Error updating backend: {str(e)}")
         return {"success": False, "message": "Error updating backend"}
-
 
 @app.route('/request_otp', methods=['POST'])
 def request_otp():
@@ -56,18 +55,18 @@ def verify_otp():
 
     if not phone_number or not otp or not phone_code_hash:
         return jsonify({"error": "Phone number, OTP, and phone_code_hash are required."}), 400
-    try:
-        result = run_async(telegram_service.verify_otp(phone_number, otp, phone_code_hash, password))
-        return jsonify(result), 200
-    except Exception as e:
-        return jsonify({"error": f"Error verifying OTP: {str(e)}", "success": False}), 500
-
-
-
+    
+    lock_path = f'store/{phone_number}_session.lock'
+    with FileLock(lock_path):
+        try:
+            result = run_async(telegram_service.verify_otp(phone_number, otp, phone_code_hash, password))
+            return jsonify(result), 200
+        except Exception as e:
+            return jsonify({"error": f"Error verifying OTP: {str(e)}", "success": False}), 500
 
 @app.route("/", methods=['GET'])
 def index():
     return jsonify({"success": True, "message": "Hello, World!"}), 200
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(host="0.0.0.0", port=5000)
