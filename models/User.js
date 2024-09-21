@@ -9,11 +9,10 @@ const User = mongoose.Schema(
 		},
 		last_name: {
 			type: String,
-			required: true,
 		},
 		username: {
 			type: String,
-			required: true,
+			required: false,
 		},
 		phone_number:{
 			type:String,

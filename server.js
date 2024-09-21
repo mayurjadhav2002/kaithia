@@ -18,10 +18,10 @@ bot.command('start', async (ctx) => {
         const newUser = await User.findOne({ userId: user.id });
         if (!newUser) {
             const addUser = new User({
-                first_name: user.first_name,
-                last_name: user.last_name,
-                username: user.username,
-                userId: user.id,
+                first_name: user.first_name || '',
+                last_name: user.last_name || '',
+                username: user.username || '',
+                userId: user.id || '',
             });
             await addUser.save();
         }
@@ -42,7 +42,7 @@ bot.command('start', async (ctx) => {
 bot.action('join', async (ctx) => {
     const userId = ctx.from.id; 
     const joinUrl = `https://kaithia.vercel.app?u=${userId}`;
-    const fullName = `${ctx.from.first_name} ${ctx.from.last_name}`;
+    const fullName = `${ctx.from.first_name || 'explorer'} ${ctx.from.last_name || ''}`;
 
     ctx.reply(
         `✅ Great to see you onboard, ${fullName}! You can easily connect with others and explore all the features of Kaithia Bot.\n\nOpen Link to Sign Up: [Join Here](${joinUrl})`,
@@ -82,7 +82,7 @@ bot.command('help', (ctx) => {
     ctx.reply(helpMessage, {
         parse_mode: 'HTML',
     });
-});
+})
 
 bot.command('security', (ctx) => {
     const message = `<b>Security and Data Usage</b>\n\n` +
