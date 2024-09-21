@@ -1,6 +1,7 @@
 import os
 import asyncio
 import logging
+import signal
 from telethon import TelegramClient, events, functions, types
 from dotenv import load_dotenv
 from watchdog.observers import Observer
@@ -19,7 +20,6 @@ session_dir = 'store'
 clients = []
 
 async def check_command(event, client):
-    """Check for the /group command and handle group creation."""
     sender = await event.get_sender()
     me = await client.get_me()
 
@@ -45,46 +45,43 @@ async def check_command(event, client):
             participants = [sender, recipient]
 
             if add_kaithia:
-                    participants.append("@kaithia_bot")
+                participants.append("@kaithia_bot")
 
             created_group = await event.client(functions.messages.CreateChatRequest(
-                    title=group_name,
-                    users=participants,
-                ))
-                
+                title=group_name,
+                users=participants,
+            ))
+            
             group_details = created_group.stringify()
-                
+            
             chat_id_match = re.search(r'peerchat\s*\(\s*chat_id\s*=\s*(\d+)\s*\)', group_details, re.IGNORECASE)
-                
+            
             if chat_id_match:
-                    chat_id = int(chat_id_match.group(1))
-                    
-                    await event.client(functions.messages.EditChatAboutRequest(
-                        peer=types.PeerChat(chat_id),
-                        about="Created by @kaithia_bot"
-                    ))
+                chat_id = int(chat_id_match.group(1))
+                
+                await event.client(functions.messages.EditChatAboutRequest(
+                    peer=types.PeerChat(chat_id),
+                    about="Created by @kaithia_bot"
+                ))
 
-                    result = await client(functions.messages.ExportChatInviteRequest(peer=types.PeerChat(chat_id=chat_id), legacy_revoke_permanent=True))
-                    invite_link = result.link
-                    
-                    
-                    await kaithia_message.edit(
-                            f"<b>@kaithia_bot</b> created group <b>{group_name}</b> successfully! \n\n Join the group using the link below: {invite_link}",
-                            parse_mode='HTML'
-                        )
-
+                result = await client(functions.messages.ExportChatInviteRequest(peer=types.PeerChat(chat_id=chat_id), legacy_revoke_permanent=True))
+                invite_link = result.link
+                
+                await kaithia_message.edit(
+                    f"<b>@kaithia_bot</b> created group <b>{group_name}</b> successfully! \n\n Join the group using the link below: {invite_link}",
+                    parse_mode='HTML'
+                )
             else:
-                    await kaithia_message.edit(
-                        f"<b>@Kaithia</b> created group <b>{group_name}</b> successfully!",
-                        parse_mode='HTML'
-                    )
+                await kaithia_message.edit(
+                    f"<b>@Kaithia</b> created group <b>{group_name}</b> successfully!",
+                    parse_mode='HTML'
+                )
         except Exception as e:
-            print(f"Error creating group: {str(e)}")
+            logging.error(f"Error creating group: {str(e)}")
             if event.message:
                 await event.message.edit(f"Failed to create group: {str(e)}")
 
 async def load_client_for_session(session_file):
-    """Load a Telegram client for the given session file."""
     session_path = os.path.join(session_dir, session_file)
     logging.info(f"Attempting to load session from: {session_path}") 
 
@@ -112,17 +109,12 @@ async def load_client_for_session(session_file):
         logging.error(f"Failed to connect {session_file}: {str(e)}")
         await client.disconnect()
 
-
 async def load_clients():
-    """Load all existing client sessions."""
     session_files = [f for f in os.listdir(session_dir) if f.endswith('_session.session')]
     for session_file in session_files:
         await load_client_for_session(session_file)
 
-
-
 class SessionFileEventHandler(FileSystemEventHandler):
-    """Handler for file system events to detect new session files."""
     def __init__(self, loop):
         self.loop = loop
 
@@ -133,17 +125,12 @@ class SessionFileEventHandler(FileSystemEventHandler):
         logging.info(f"New session file detected: {session_file}")
         asyncio.run_coroutine_threadsafe(load_client_for_session(session_file), self.loop)
 
-
-
 def start_observer(loop):
-    """Start the file system observer to watch for new session files."""
     event_handler = SessionFileEventHandler(loop)
     observer = Observer()
     observer.schedule(event_handler, path=session_dir, recursive=False)
     observer.start()
     return observer
-
-
 
 async def main():
     loop = asyncio.get_event_loop()
@@ -151,11 +138,23 @@ async def main():
     await load_clients()
     try:
         await asyncio.gather(*[client.run_until_disconnected() for client in clients])
+    except asyncio.CancelledError:
+        logging.info("Main loop cancelled.")
     finally:
         observer.stop()
         observer.join()
 
-
+def signal_handler(sig, frame):
+    logging.info("Received exit signal, shutting down...")
+    for client in clients:
+        asyncio.create_task(client.disconnect())
+    asyncio.get_event_loop().stop()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    logging.basicConfig(level=logging.INFO)
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    try:
+        asyncio.run(main())
+    except Exception as e:
+        logging.error(f"An unexpected error occurred: {str(e)}")
